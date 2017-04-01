@@ -4,7 +4,7 @@
          "memory-racket.rkt" "queue-racket.rkt" "special.rkt")
 (provide (all-defined-out))
 
-(define debug #f)
+(define debug #t)
 (struct instclass (opcodes pool args ins outs commute) #:mutable)
 (struct argtype (validfunc valid statetype) #:mutable)
 (struct statetype (get set min max const structure))

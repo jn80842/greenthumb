@@ -28,7 +28,7 @@
     (define (optimize-inner code-org live-out-org rootdir cores time-limit prog-size 
                             assume input-file start-prog)
       ;;(raise "done")
-      (pretty-display (format "SEACH TYPE: ~a size=~a" search-type prog-size))
+      (pretty-display (format "SEARCH TYPE: ~a size=~a" search-type prog-size))
       ;;(define path (format "~a/driver" dir))
       (system (format "rm -r ~a" rootdir))
       (system (format "mkdir ~a" rootdir))
