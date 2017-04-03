@@ -421,9 +421,11 @@
 	       (send stat simulate (- t2 t1))
 	       (send stat check (- t3 t2))
 	       ret)))
+
+
       
-      (define (cost-all-inputs program okay-cost)
-        (define change-mode #f)
+      (define (cost-all-inputs program okay-cost lm-score-diff)
+        (define change-mode #f) 
 
         (define (loop correct inputs outputs)
           (when debug (pretty-display `(correct ,correct)))
@@ -439,7 +441,7 @@
 
         (define correct
           (and (send simulator is-valid? program)
-               (loop 0 inputs outputs)))
+               (loop lm-score-diff inputs outputs))) ;; diff in lm scores should replace 0 here
         (when debug (pretty-display `(final-correct ,correct ,(length inputs))))
 
         (define ce #f)
@@ -509,7 +511,7 @@
         (- current-cost (/ (log (random)) beta)))
 
       ;; Main loop
-      (define (iter current current-cost)
+      (define (iter current current-cost current-lm-score)
         (when debug (pretty-display ">>> iter >>>"))
         (define update-size (send stat inc-iter current-cost))
         (when (and update-size (or (<= (+ update-size 5) (vector-length current))
@@ -543,30 +545,24 @@
         (define proposal (mutate current))
         (define t2 (current-milliseconds))
         (send stat mutate (- t2 t1))
-        (define (get-lm-cost program)
-          (define lm-script (format "~a \"~a\"" "/Users/mpu/mapl/greenthumb/score.sh" program))
-          (pretty-display lm-script)
-          (define os (open-output-string))
-          (call-with-output-string (λ (p) (parameterize ([current-output-port os])
-                                          (system lm-script))))
-          (string-trim (get-output-string os))
-          )
+
+        (define proposal-lm-score (get-lm-score (send printer program->lm-string
+                                                     (send printer decode proposal))))
+
         (when debug
               (pretty-display (format "================ Current (syn=~a) =================" syn-mode))
               (send printer print-syntax (send printer decode current))
-              (pretty-display (format "score: ~a" (get-lm-cost (send printer program->lm-string
-                                                                     (send printer decode current)))))
+              (pretty-display (format "score: ~a" current-lm-score))
               ;; (define cost (cost-all-inputs current (arithmetic-shift 1 32)))
               ;; (pretty-display (format "actual cost: ~a" cost))
               (pretty-display (format "================ Propose (syn=~a) =================" syn-mode))
               (send printer print-syntax (send printer decode proposal))
-              (pretty-display (format "score: ~a" (get-lm-cost (send printer program->lm-string
-                                                                     (send printer decode proposal)))))
+              (pretty-display (format "score: ~a" proposal-lm-score))
               )
         (define n-inputs (length inputs))
         (define okay-cost (accept-cost current-cost))
         (when debug (pretty-display ">>> start simulate"))
-        (define cost-correct (cost-all-inputs proposal okay-cost))
+        (define cost-correct (cost-all-inputs proposal okay-cost (- proposal-lm-score current-lm-score)))
         (when debug (pretty-display ">>> finish simulate"))
         (define proposal-cost (car cost-correct))
         (when debug
@@ -594,7 +590,7 @@
               (iter (if (cdr cost-correct) 
                         (send machine clean-code proposal prefix)
                         proposal) 
-                    proposal-cost))
+                    proposal-cost proposal-lm-score))
             (begin
               ;; Adjust cost due to new counterexample
               (when (> (length inputs) n-inputs)
@@ -605,7 +601,7 @@
 			(set! current-cost w-error))
                     (when debug (pretty-display (format "to ~a." current-cost)))
                     )
-              (iter current current-cost))
+              (iter current current-cost current-lm-score))
             ))
 
       (with-handlers 
@@ -614,9 +610,19 @@
        (timeout time-limit
                 (iter init 
                       ;; cost-all-inputs can return #f if program is invalid
-                      (or (car (cost-all-inputs init w-error))
+                      (or (car (cost-all-inputs init w-error 0))
                           w-error)
+                      (get-lm-score (send printer program->lm-string (send printer decode init)))
                       ))))
+
+    (define (get-lm-score program)
+      (define lm-script (format "~a \"~a\"" "/Users/mpu/mapl/greenthumb/score.sh" program))
+      (pretty-display lm-script)
+      (define os (open-output-string))
+      (call-with-output-string (λ (p) (parameterize ([current-output-port os])
+                                        (system lm-script))))
+      (string->number (string-trim (get-output-string os)))
+      )
 
     ;; Population count for 32-bit number
     (define (pop-count32 a)

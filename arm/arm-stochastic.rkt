@@ -6,6 +6,16 @@
 
 (provide arm-stochastic%)
 
+;; this doesnt belong here
+;; 30% add 30% mov 40% orr
+(define (random-opcode-distro)
+  (define n (random))
+  (cond
+    [(> n 0.7) "add"]
+    [(> n 0.4) "sub"]
+    [else "orr"])
+  )
+
 (define arm-stochastic%
   (class stochastic%
     (super-new)
