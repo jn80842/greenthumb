@@ -11,6 +11,7 @@
     (public encode decode 
             print-struct print-struct-inst
             print-syntax print-syntax-inst
+            print-lm print-lm-inst
             compress-state-space decompress-state-space
             config-from-string-ir set-config-string
             output-constraint-string output-assume-string
@@ -55,6 +56,22 @@
       (define (f x indent)
         (cond
          [(inst? x) (print-syntax-inst x indent)]
+         
+         [(or (list? x) (vector? x))
+          (for ([i x]) (f i indent))]
+         
+         [else
+          (pretty-display (format "~a~a" indent x))]))
+      (f x indent))
+
+    (define (print-lm-inst x)
+      (print-syntax x))
+
+     (define (print-lm x [indent ""])
+      (define (inc ind) (string-append ind " "))
+      (define (f x indent)
+        (cond
+         [(inst? x) (print-lm-inst x)]
          
          [(or (list? x) (vector? x))
           (for ([i x]) (f i indent))]

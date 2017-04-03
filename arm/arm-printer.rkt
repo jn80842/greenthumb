@@ -12,10 +12,21 @@
     (inherit-field machine report-mutations)
     (override encode-inst decode-inst print-struct-inst print-syntax-inst
               compress-state-space decompress-state-space
-              output-constraint-string)
+              output-constraint-string
+              print-lm-inst)
 
     (define (print-struct-inst x [indent ""])
-      (pretty-display (format "~a(inst ~a ~a)" indent (inst-op x) (inst-args x))))
+      ;;(pretty-display (format "~a(inst ~a ~a)" indent (inst-op x) (inst-args x))))
+      (pretty-display (format "~a ~a" indent (decode-inst x))))
+
+    (define (print-lm-inst x)
+      (pretty-display "PRINTING LM FORMAT")
+      (define masked-args (for/vector ([a (inst-args x)])
+                            (if (string->number a)
+                                "IMMVAL"
+                                a)))
+      (print-syntax-inst (inst (inst-op x) masked-args))
+      )
 
     (define (print-syntax-inst x [indent ""])
       (define ops-vec (inst-op x))

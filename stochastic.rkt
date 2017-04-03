@@ -545,11 +545,11 @@
         (send stat mutate (- t2 t1))
         (when debug
               (pretty-display (format "================ Current (syn=~a) =================" syn-mode))
-              (send printer print-struct (send printer decode current))
+              (send printer print-lm (send printer decode current))
               ;; (define cost (cost-all-inputs current (arithmetic-shift 1 32)))
               ;; (pretty-display (format "actual cost: ~a" cost))
               (pretty-display (format "================ Propose (syn=~a) =================" syn-mode))
-              (send printer print-struct (send printer decode proposal))
+              (send printer print-lm (send printer decode proposal))
               )
         (define n-inputs (length inputs))
         (define okay-cost (accept-cost current-cost))

@@ -61,8 +61,7 @@
     ;; state1: expected in progstate format
     ;; state2: actual in progstate format
     (define (correctness-cost state1 state2 constraint)
-      (pretty-display (format "called correctness cost"))
-      (define lm-script "/Users/mpu/cse517/mapl/greenthumb/smol.sh")
+      (define lm-script "/Users/mpu/mapl/greenthumb/smol.sh")
       (define (get-lm-cost)
        ;; (define-values (sp i o e) (subprocess #f #f #f lm-script))
        ;; (subprocess-wait sp)
