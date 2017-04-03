@@ -61,24 +61,6 @@
     ;; state1: expected in progstate format
     ;; state2: actual in progstate format
     (define (correctness-cost state1 state2 constraint)
-      (define lm-script "/Users/mpu/mapl/greenthumb/smol.sh")
-      (define (get-lm-cost)
-       ;; (define-values (sp i o e) (subprocess #f #f #f lm-script))
-       ;; (subprocess-wait sp)
-       ;; (define output-num (string->number (string-trim (port->string i))))
-       ;; (close-input-port i)
-       ;; (close-output-port o)
-       ;; (close-input-port e)
-       ;; output-num
-       (define os (open-output-string))
-       (call-with-output-string (λ (p) (parameterize ([current-output-port os])
-                                          (system lm-script))))
-        ;(pretty-display (get-output-string os))
-        (string->number (string-trim (get-output-string os)))
-        ;;(with-output-to-string (λ () (system lm-script)))
-        ;;(string->number (string-trim (with-output-to-string (λ () (system lm-script)))))
-        ;;0
-        )
       (+ (correctness-cost-base (progstate-regs state1)
                                 (progstate-regs state2)
                                 (progstate-regs constraint)
@@ -91,7 +73,6 @@
                   (not (equal? (progstate-z state1) (progstate-z state2))))
              1
              0)
-         (get-lm-cost)
          ))
     ))
 

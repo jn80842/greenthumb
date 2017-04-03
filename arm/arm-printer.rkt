@@ -13,20 +13,45 @@
     (override encode-inst decode-inst print-struct-inst print-syntax-inst
               compress-state-space decompress-state-space
               output-constraint-string
-              print-lm-inst)
+              print-lm-inst inst->lm-string)
 
     (define (print-struct-inst x [indent ""])
       ;;(pretty-display (format "~a(inst ~a ~a)" indent (inst-op x) (inst-args x))))
       (pretty-display (format "~a ~a" indent (decode-inst x))))
 
     (define (print-lm-inst x)
-      (pretty-display "PRINTING LM FORMAT")
       (define masked-args (for/vector ([a (inst-args x)])
                             (if (string->number a)
                                 "IMMVAL"
                                 a)))
       (print-syntax-inst (inst (inst-op x) masked-args))
       )
+
+    (define (inst->lm-string x)
+      (define masked-args (for/vector ([a (inst-args x)])
+                            (if (string->number a)
+                                "IMMVAL"
+                                a)))
+      (define ops-vec (inst-op x))
+      (define args (vector-copy masked-args))
+      (define op (vector-ref ops-vec 0))
+      (define shfop (vector-ref ops-vec 2))
+      (when (or (equal? op "str") (equal? op "ldr"))
+        (when (equal? "r11" (vector-ref args 1))
+          (vector-set! args 1 "fp"))
+        (when (not (equal? (substring (vector-ref args 2) 0 ) "r"))
+          (vector-set! args 2 (number->string (* 4 (string->number (vector-ref args 2)))))))
+      (define args-list (vector->list args))
+      (define len (length args-list))
+      (cond
+        [(equal? op "nop") empty] ;; nop is not present in the LM dataset
+        [(and shfop (not (equal? shfop "")))
+         (format "~a~a ~a, ~a ~a" op (vector-ref ops-vec 1)
+                 (string-join (take args-list (sub1 len)) ", ")
+                 shfop (last args-list) )]
+        [else
+         (format "~a~a ~a" op (vector-ref ops-vec 1) (string-join args-list ", "))]))
+      
 
     (define (print-syntax-inst x [indent ""])
       (define ops-vec (inst-op x))

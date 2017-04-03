@@ -12,6 +12,7 @@
             print-struct print-struct-inst
             print-syntax print-syntax-inst
             print-lm print-lm-inst
+            program->lm-string inst->lm-string
             compress-state-space decompress-state-space
             config-from-string-ir set-config-string
             output-constraint-string output-assume-string
@@ -79,6 +80,21 @@
          [else
           (pretty-display (format "~a~a" indent x))]))
       (f x indent))
+
+    (define (program->lm-string x)
+      (define (inc ind) (string-append ind " "))
+      (define (f x)
+        (cond
+          [(inst? x) (inst->lm-string x)]
+          [(or (list? x) (vector? x))
+           (for/list ([i x]) (f i))]
+          [else
+           (format "~a" x)]))
+      (define output (list (f x)))
+      (string-join (flatten output) "\n"))
+
+    (define (inst->lm-string x)
+      "not implemented")
 
     ;; Default: no compression
     (define (compress-state-space program live-out)
