@@ -1,4 +1,4 @@
 #!/bin/bash
 
 
-python /Users/mpu/mapl/greenthumb/score.py "$1"
+python /Users/mpu/research/stochsolverLM/greenthumb/score.py "$1"

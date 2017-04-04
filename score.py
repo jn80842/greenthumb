@@ -22,7 +22,7 @@ def get_parser():
 if __name__ == '__main__':
   parser = get_parser()
   config = parser.parse_args()
-  model = kenlm.Model("/Users/mpu/mapl/c_programs/assembly/processed_total_suite.binary")
+  model = kenlm.Model("/Users/mpu/research/stochsolverLM/c_programs/assembly/processed_total_suite.binary")
   input_data = config.input
   input_data = input_data.split("\n")
   print(find_perplexity(model,input_data))

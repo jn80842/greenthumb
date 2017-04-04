@@ -1,4 +1,4 @@
-#lang racket
+/#lang racket
 
 (require "inst.rkt" "stat.rkt" "machine.rkt")
 
@@ -616,7 +616,7 @@
                       ))))
 
     (define (get-lm-score program)
-      (define lm-script (format "~a \"~a\"" "/Users/mpu/mapl/greenthumb/score.sh" program))
+      (define lm-script (format "~a \"~a\"" "/Users/mpu/research/stochsolverLM/greenthumb/score.sh" program))
       (pretty-display lm-script)
       (define os (open-output-string))
       (call-with-output-string (λ (p) (parameterize ([current-output-port os])
