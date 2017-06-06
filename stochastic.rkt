@@ -1,4 +1,4 @@
-/#lang racket
+#lang racket
 
 (require "inst.rkt" "stat.rkt" "machine.rkt")
 
@@ -11,7 +11,7 @@
             get-mutations mutate 
             mutate-opcode mutate-operand mutate-swap
             mutate-operand-specific mutate-other
-            random-instruction 
+            random-instruction random-opcode
 	    random-args-from-op pop-count32 pop-count64 correctness-cost-base correctness-one-many)
     (abstract correctness-cost)
               
@@ -279,13 +279,17 @@
                  (format " --> choices = ~a"
                          (map (lambda (x) (send machine get-opcode-name x)) valid-opcodes))))
           (send stat inc-propose `inst)
-          (random-from-list valid-opcodes)]))
+        ;;  (random-from-list valid-opcodes)]))
+          (random-opcode valid-opcodes)]))
       
       (when debug
             (pretty-display (format " >> mutate instruction ~a" (send machine get-opcode-name new-opcode-id))))
       (define new-entry (random-instruction index n my-live-in new-opcode-id))
       (vector-set! new-p index new-entry)
       new-p)
+
+    (define (random-opcode valid-opcodes)
+      (random-from-list valid-opcodes))
     
     ;; Create a new instruction with operands that are live (in live-in) and with opcode-id if specified.
     ;; live-in: vector/list/pair format
@@ -616,12 +620,13 @@
                       ))))
 
     (define (get-lm-score program)
-      (define lm-script (format "~a \"~a\"" "/Users/mpu/research/stochsolverLM/greenthumb/score.sh" program))
-      (pretty-display lm-script)
-      (define os (open-output-string))
-      (call-with-output-string (λ (p) (parameterize ([current-output-port os])
-                                        (system lm-script))))
-      (string->number (string-trim (get-output-string os)))
+     ;; (define lm-script (format "~a \"~a\"" "/Users/mpu/mapl/greenthumb/score.sh" program))
+     ;; (pretty-display lm-script)
+     ;; (define os (open-output-string))
+     ;; (call-with-output-string (λ (p) (parameterize ([current-output-port os])
+     ;;                                   (system lm-script))))
+     ;; (string->number (string-trim (get-output-string os)))
+      0
       )
 
     ;; Population count for 32-bit number

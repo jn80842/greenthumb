@@ -2,7 +2,8 @@
 
 (require "../stochastic.rkt"
          "../inst.rkt"
-         "../machine.rkt" "arm-machine.rkt")
+         "../machine.rkt" "arm-machine.rkt"
+         "arm-distribution.rkt")
 
 (provide arm-stochastic%)
 
@@ -61,6 +62,9 @@
         new-p]
 
        [else (mutate p)]))
+
+    (define/override (random-opcode valid-opcodes)
+      (send machine get-opcode-id (get-weighted-random-opcode (map (λ (opcode) (send machine get-opcode-name opcode)) valid-opcodes))))
 
 
     (define (diff-cost x y)
